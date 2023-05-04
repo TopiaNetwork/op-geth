@@ -255,11 +255,14 @@ func opKeccak256(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) (
 	return nil, nil
 }
 func opDBCreate(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+	chainID, slot := scope.Stack.pop(), scope.Stack.pop()
 	keyOffset, keySize, valOffset, valSize := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop()
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
 	val := scope.Memory.GetPtr(int64(valOffset.Uint64()), int64(valSize.Uint64()))
-	fmt.Printf("opDBCreate info: \n key: %s\n val: %s\n", string(key), string(val))
-	if err := interpreter.evm.Topia.Create(key, val); err != nil {
+	dbKey := fmt.Sprintf("%v.%v.%v", chainID.Uint64(), common.Address(slot.Bytes20()), string(key))
+	fmt.Printf("opDBCreate info: \n key: %s\n val: %s\n dbKey: %s\n",
+		string(key), string(val), dbKey)
+	if err := interpreter.evm.Topia.Create([]byte(dbKey), val); err != nil {
 		scope.Stack.push(new(uint256.Int).Clear())
 		return nil, nil
 	}
@@ -267,10 +270,12 @@ func opDBCreate(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 	return nil, nil
 }
 func opDBQuery(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+	chainID, slot := scope.Stack.pop(), scope.Stack.pop()
 	memOffset, keyOffset, keySize := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop()
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
-	fmt.Printf("opDBQuery info: \n key: %s\n", string(key))
-	val, err := interpreter.evm.Topia.Get(key)
+	dbKey := fmt.Sprintf("%v.%v.%v", chainID.Uint64(), common.Address(slot.Bytes20()), string(key))
+	fmt.Printf("opDBQuery info: \n key: %s\n dbKey %s\n", string(key), dbKey)
+	val, err := interpreter.evm.Topia.Get([]byte(dbKey))
 	if err != nil {
 		val = []byte("data not found")
 		scope.Memory.Resize(memOffset.Uint64() + uint64(len(val)))
@@ -287,10 +292,12 @@ func opDBQuery(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]
 	return nil, nil
 }
 func opDBDelete(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+	chainID, slot := scope.Stack.pop(), scope.Stack.pop()
 	keyOffset, keySize := scope.Stack.pop(), scope.Stack.pop()
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
-	fmt.Printf("opDBDelete info: \n key: %s\n", string(key))
-	if err := interpreter.evm.Topia.Delete(key); err != nil {
+	dbKey := fmt.Sprintf("%v.%v.%v", chainID.Uint64(), common.Address(slot.Bytes20()), string(key))
+	fmt.Printf("opDBDelete info: \n key: %s\n dbKey %v\n", string(key), dbKey)
+	if err := interpreter.evm.Topia.Delete([]byte(dbKey)); err != nil {
 		scope.Stack.push(new(uint256.Int).Clear())
 		return nil, nil
 	}
@@ -298,11 +305,14 @@ func opDBDelete(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 	return nil, nil
 }
 func opDBUpdate(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+	chainID, slot := scope.Stack.pop(), scope.Stack.pop()
 	keyOffset, keySize, valOffset, valSize := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop()
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
 	val := scope.Memory.GetPtr(int64(valOffset.Uint64()), int64(valSize.Uint64()))
-	fmt.Printf("opDBUpdate info: \n key: %s\n val: %s\n", string(key), string(val))
-	if err := interpreter.evm.Topia.Update(key, val); err != nil {
+	dbKey := fmt.Sprintf("%v.%v.%v", chainID.Uint64(), common.Address(slot.Bytes20()), string(key))
+	fmt.Printf("opDBUpdate info: \n key: %s\n val: %s\n dbKey %s\n",
+		string(key), string(val), dbKey)
+	if err := interpreter.evm.Topia.Update([]byte(dbKey), val); err != nil {
 		scope.Stack.push(new(uint256.Int).Clear())
 		return nil, nil
 	}

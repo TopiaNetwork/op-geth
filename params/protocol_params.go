@@ -56,6 +56,11 @@ const (
 	DBDeleteGas uint64 = 2
 	DBUpdateGas uint64 = 2
 
+	DBCreateWordGas uint64 = 6
+	DBQueryWordGas  uint64 = 6
+	DBDeleteWordGas uint64 = 6
+	DBUpdateWordGas uint64 = 6
+
 	SstoreSetGas    uint64 = 20000 // Once per SSTORE operation.
 	SstoreResetGas  uint64 = 5000  // Once per SSTORE operation if the zeroness changes from zero.
 	SstoreClearGas  uint64 = 5000  // Once per SSTORE operation if the zeroness doesn't change.
