@@ -259,9 +259,9 @@ func opDBCreate(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
 	val := scope.Memory.GetPtr(int64(valOffset.Uint64()), int64(valSize.Uint64()))
 	fmt.Printf("opDBCreate info: \n key: %s\n val: %s\n", string(key), string(val))
-	if err := interpreter.evm.SimpleKVDB.Create(key, val); err != nil {
+	if err := interpreter.evm.Topia.Create(key, val); err != nil {
 		scope.Stack.push(new(uint256.Int).Clear())
-		return nil, err
+		return nil, nil
 	}
 	scope.Stack.push(new(uint256.Int).SetOne())
 	return nil, nil
@@ -270,9 +270,14 @@ func opDBQuery(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]
 	memOffset, keyOffset, keySize := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop()
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
 	fmt.Printf("opDBQuery info: \n key: %s\n", string(key))
-	val, err := interpreter.evm.SimpleKVDB.Get(key)
+	val, err := interpreter.evm.Topia.Get(key)
 	if err != nil {
-		return nil, err
+		val = []byte("data not found")
+		scope.Memory.Resize(memOffset.Uint64() + uint64(len(val)))
+		scope.Memory.Set(memOffset.Uint64(), uint64(len(val)), val)
+		scope.Stack.push(new(uint256.Int).SetUint64(memOffset.Uint64()))
+		scope.Stack.push(new(uint256.Int).SetUint64(uint64(len(val))))
+		return nil, nil
 	}
 	fmt.Printf("opDBQuery info: \n val: %s\n", string(val))
 	scope.Memory.Resize(memOffset.Uint64() + uint64(len(val)))
@@ -285,9 +290,9 @@ func opDBDelete(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 	keyOffset, keySize := scope.Stack.pop(), scope.Stack.pop()
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
 	fmt.Printf("opDBDelete info: \n key: %s\n", string(key))
-	if err := interpreter.evm.SimpleKVDB.Delete(key); err != nil {
+	if err := interpreter.evm.Topia.Delete(key); err != nil {
 		scope.Stack.push(new(uint256.Int).Clear())
-		return nil, err
+		return nil, nil
 	}
 	scope.Stack.push(new(uint256.Int).SetOne())
 	return nil, nil
@@ -297,9 +302,9 @@ func opDBUpdate(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 	key := scope.Memory.GetPtr(int64(keyOffset.Uint64()), int64(keySize.Uint64()))
 	val := scope.Memory.GetPtr(int64(valOffset.Uint64()), int64(valSize.Uint64()))
 	fmt.Printf("opDBUpdate info: \n key: %s\n val: %s\n", string(key), string(val))
-	if err := interpreter.evm.SimpleKVDB.Update(key, val); err != nil {
+	if err := interpreter.evm.Topia.Update(key, val); err != nil {
 		scope.Stack.push(new(uint256.Int).Clear())
-		return nil, err
+		return nil, nil
 	}
 	scope.Stack.push(new(uint256.Int).SetOne())
 	return nil, nil

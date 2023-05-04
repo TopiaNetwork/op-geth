@@ -16,15 +16,15 @@ type KVDB interface {
 	Close() error
 }
 
-type LevelKVDB struct {
+type TopiaDB struct {
 	Url string
 }
 
-func NewLevelKVDB(url string) *LevelKVDB {
-	return &LevelKVDB{Url: url}
+func NewTopiaDB(url string) *TopiaDB {
+	return &TopiaDB{Url: url}
 }
 
-func (db *LevelKVDB) Get(key []byte) ([]byte, error) {
+func (db *TopiaDB) Get(key []byte) ([]byte, error) {
 	resp, err := http.Get(fmt.Sprintf("%v/get/%s", db.Url, key))
 	if err != nil {
 		return nil, err
@@ -49,9 +49,18 @@ func (db *LevelKVDB) Get(key []byte) ([]byte, error) {
 	return []byte(result["value"]), nil
 }
 
-func (db *LevelKVDB) Create(key, value []byte) error {
+func (db *TopiaDB) Create(key, value []byte) error {
+	return db.put(key, value)
+}
+
+func (db *TopiaDB) Update(key, value []byte) error {
+	return db.put(key, value)
+}
+
+func (db *TopiaDB) put(key, value []byte) error {
 	data := fmt.Sprintf(`{"key":"%s", "value":"%s"}`, string(key), string(value))
-	resp, err := http.Post(fmt.Sprintf("%v/put", db.Url), "application/json", strings.NewReader(data))
+	resp, err := http.Post(fmt.Sprintf("%v/put", db.Url), "application/json",
+		strings.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -63,14 +72,26 @@ func (db *LevelKVDB) Create(key, value []byte) error {
 	return nil
 }
 
-func (db *LevelKVDB) Update(key, value []byte) error {
+func (db *TopiaDB) Delete(key []byte) error {
+	req, err := http.NewRequest(http.MethodDelete,
+		fmt.Sprintf("%s/delete/%s", db.Url, key), nil)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("delete request failed with status: %d", resp.StatusCode)
+	}
 	return nil
 }
 
-func (db *LevelKVDB) Delete(key []byte) error {
-	return nil
-}
-
-func (db *LevelKVDB) Close() error {
+func (db *TopiaDB) Close() error {
 	return nil
 }

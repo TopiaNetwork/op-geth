@@ -105,7 +105,7 @@ type EVM struct {
 	// StateDB gives access to the underlying state
 	StateDB StateDB
 	// SimpleKVDB is a simple key-value database used for the EVM
-	SimpleKVDB *LevelKVDB
+	Topia *TopiaDB
 	// Depth is the current call stack
 	depth int
 
@@ -135,7 +135,7 @@ func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig
 		Context:     blockCtx,
 		TxContext:   txCtx,
 		StateDB:     statedb,
-		SimpleKVDB:  NewLevelKVDB("http://localhost:50021"),
+		Topia:       NewTopiaDB("http://localhost:50021"),
 		Config:      config,
 		chainConfig: chainConfig,
 		chainRules:  chainConfig.Rules(blockCtx.BlockNumber, blockCtx.Random != nil, blockCtx.Time),
