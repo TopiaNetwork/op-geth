@@ -277,7 +277,7 @@ func opDBQuery(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]
 	fmt.Printf("opDBQuery info: \n key: %s\n dbKey %s\n", string(key), dbKey)
 	val, err := interpreter.evm.Topia.Get([]byte(dbKey))
 	if err != nil {
-		val = []byte("data not found")
+		val = []byte("")
 		scope.Memory.Resize(memOffset.Uint64() + uint64(len(val)))
 		scope.Memory.Set(memOffset.Uint64(), uint64(len(val)), val)
 		scope.Stack.push(new(uint256.Int).SetUint64(memOffset.Uint64()))
