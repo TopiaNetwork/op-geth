@@ -55,6 +55,7 @@ const (
 	DBQueryGas  uint64 = 2
 	DBDeleteGas uint64 = 2
 	DBUpdateGas uint64 = 2
+	DBValLenGas uint64 = 2
 
 	DBCreateWordGas uint64 = 6
 	DBQueryWordGas  uint64 = 6

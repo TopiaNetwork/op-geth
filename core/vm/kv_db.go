@@ -50,16 +50,16 @@ func (db *TopiaDB) Get(key []byte) ([]byte, error) {
 }
 
 func (db *TopiaDB) Create(key, value []byte) error {
-	return db.put(key, value)
+	return db.put(key, value, "create")
 }
 
 func (db *TopiaDB) Update(key, value []byte) error {
-	return db.put(key, value)
+	return db.put(key, value, "update")
 }
 
-func (db *TopiaDB) put(key, value []byte) error {
+func (db *TopiaDB) put(key, value []byte, action string) error {
 	data := fmt.Sprintf(`{"key":"%s", "value":"%s"}`, string(key), string(value))
-	resp, err := http.Post(fmt.Sprintf("%v/put", db.Url), "application/json",
+	resp, err := http.Post(fmt.Sprintf("%v/%v", db.Url, action), "application/json",
 		strings.NewReader(data))
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (db *TopiaDB) put(key, value []byte) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("put request failed with status: %d", resp.StatusCode)
+		return fmt.Errorf("%v request failed with status: %d", action, resp.StatusCode)
 	}
 	return nil
 }
@@ -89,6 +89,34 @@ func (db *TopiaDB) Delete(key []byte) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("delete request failed with status: %d", resp.StatusCode)
 	}
+	return nil
+}
+
+func (db *TopiaDB) Lock() error {
+	resp, err := http.Get(fmt.Sprintf("%v/lock_tx", db.Url))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("lock request failed with status: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func (db *TopiaDB) Unlock() error {
+	resp, err := http.Get(fmt.Sprintf("%v/unlock_tx", db.Url))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unlock request failed with status: %d", resp.StatusCode)
+	}
+
 	return nil
 }
 

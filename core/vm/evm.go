@@ -87,6 +87,10 @@ type TxContext struct {
 	// Message information
 	Origin   common.Address // Provides information for ORIGIN
 	GasPrice *big.Int       // Provides information for GASPRICE
+
+	TxHash          common.Hash
+	ChainId         *big.Int
+	ContractAddress common.Address
 }
 
 // EVM is the Ethereum Virtual Machine base object and provides
@@ -529,3 +533,11 @@ func (evm *EVM) Create2(caller ContractRef, code []byte, gas uint64, endowment *
 
 // ChainConfig returns the environment's chain configuration
 func (evm *EVM) ChainConfig() *params.ChainConfig { return evm.chainConfig }
+
+func (evm *EVM) LockTx() {
+	evm.Topia.Lock()
+}
+
+func (evm *EVM) UnlockTx() {
+	evm.Topia.Unlock()
+}

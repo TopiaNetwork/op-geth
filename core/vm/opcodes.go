@@ -69,7 +69,8 @@ const (
 	DBQUERY   OpCode = 0x22
 	DBDELETE  OpCode = 0x23
 	DBUPDATE  OpCode = 0x24
-	DBTEST    OpCode = 0x25
+	DBVALLEN  OpCode = 0x25
+	DBTEST    OpCode = 0x2f
 )
 
 // 0x30 range - closure state.
